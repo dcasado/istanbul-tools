@@ -22,7 +22,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core"
-
 	"github.com/getamis/istanbul-tools/cmd/istanbul/extra"
 )
 
@@ -30,7 +29,7 @@ type Option func(*core.Genesis)
 
 func Validators(addrs ...common.Address) Option {
 	return func(genesis *core.Genesis) {
-		extraData, err := extra.Encode("0x00", addrs)
+		extraData, err := extra.Encode("0x00", addrs, addrs)
 		if err != nil {
 			log.Error("Failed to encode extra data", "err", err)
 			return

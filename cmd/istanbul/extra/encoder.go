@@ -25,7 +25,14 @@ import (
 	atypes "github.com/getamis/go-ethereum/core/types"
 )
 
-func Encode(vanity string, validators []common.Address) (string, error) {
+type IstanbulExtra struct {
+	Validators    []common.Address
+	Pool          []common.Address
+	Seal          []byte
+	CommittedSeal [][]byte
+}
+
+func Encode(vanity string, validators []common.Address, pool []common.Address) (string, error) {
 	newVanity, err := hexutil.Decode(vanity)
 	if err != nil {
 		return "", err
@@ -36,8 +43,9 @@ func Encode(vanity string, validators []common.Address) (string, error) {
 	}
 	newVanity = newVanity[:atypes.IstanbulExtraVanity]
 
-	ist := &atypes.IstanbulExtra{
+	ist := &IstanbulExtra{
 		Validators:    validators,
+		Pool:          pool,
 		Seal:          make([]byte, atypes.IstanbulExtraSeal),
 		CommittedSeal: [][]byte{},
 	}

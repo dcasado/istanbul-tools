@@ -38,6 +38,11 @@ var (
 		Usage: "Validators for RLP encoded Istanbul extraData",
 	}
 
+	poolFlag = cli.StringFlag{
+		Name:  "pool",
+		Usage: "Pool of validators for RLP encoded Istanbul extraData",
+	}
+
 	vanityFlag = cli.StringFlag{
 		Name:  "vanity",
 		Usage: "Vanity for RLP encoded Istanbul extraData",

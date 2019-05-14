@@ -50,6 +50,7 @@ var (
 				Flags: []cli.Flag{
 					configFlag,
 					validatorsFlag,
+					poolFlag,
 					vanityFlag,
 				},
 				Description: `
@@ -63,6 +64,7 @@ var (
 func encode(ctx *cli.Context) error {
 	path := ctx.String(configFlag.Name)
 	validators := ctx.String(validatorsFlag.Name)
+	pool := ctx.String(poolFlag.Name)
 	if len(path) == 0 && len(validators) == 0 {
 		return cli.NewExitError("Must supply config file or enter validators", 0)
 	}
@@ -75,8 +77,8 @@ func encode(ctx *cli.Context) error {
 		fmt.Println("Encoded Istanbul extra-data:", extraData)
 	}
 
-	if len(validators) != 0 {
-		extraData, err := fromRawData(ctx.String(vanityFlag.Name), validators)
+	if len(validators) != 0 && len(pool) != 0 {
+		extraData, err := fromRawData(ctx.String(vanityFlag.Name), validators, pool)
 		if err != nil {
 			return cli.NewExitError("Failed to encode from flags", 0)
 		}
@@ -85,14 +87,21 @@ func encode(ctx *cli.Context) error {
 	return nil
 }
 
-func fromRawData(vanity string, validators string) (string, error) {
+func fromRawData(vanity string, validators string, pool string) (string, error) {
 	vs := splitAndTrim(validators)
+	ps := splitAndTrim(pool)
 
 	addrs := make([]common.Address, len(vs))
 	for i, v := range vs {
 		addrs[i] = common.HexToAddress(v)
 	}
-	return Encode(vanity, addrs)
+
+	poolAddrs := make([]common.Address, len(ps))
+	for i, v := range ps {
+		poolAddrs[i] = common.HexToAddress(v)
+	}
+
+	return Encode(vanity, addrs, poolAddrs)
 }
 
 func fromConfig(path string) (string, error) {
@@ -105,13 +114,14 @@ func fromConfig(path string) (string, error) {
 	var config struct {
 		Vanity     string
 		Validators []common.Address
+		Pool       []common.Address
 	}
 
 	if err := toml.NewDecoder(file).Decode(&config); err != nil {
 		return "", cli.NewExitError(fmt.Sprintf("Failed to parse config file: %v", err), 2)
 	}
 
-	return Encode(config.Vanity, config.Validators)
+	return Encode(config.Vanity, config.Validators, config.Pool)
 }
 
 func decode(ctx *cli.Context) error {
@@ -129,6 +139,10 @@ func decode(ctx *cli.Context) error {
 
 	for _, v := range istanbulExtra.Validators {
 		fmt.Println("validator: ", v.Hex())
+	}
+
+	for _, v := range istanbulExtra.Pool {
+		fmt.Println("pool: ", v.Hex())
 	}
 
 	if len(istanbulExtra.Seal) != 0 {
