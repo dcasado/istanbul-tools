@@ -38,6 +38,7 @@ COPYRIGHT:
 ```go
 type IstanbulExtra struct {
     Validators    []common.Address  // Validator addresses
+    Pool          []common.Address  // Validator pool addresses
     Seal          []byte            // Proposer seal 65 bytes
     CommittedSeal [][]byte          // Committed seal, 65 * len(Validators) bytes
 }
